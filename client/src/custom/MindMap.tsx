@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import {
   ReactFlow,
   Background,
@@ -14,6 +14,7 @@ import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import CustomDatabaseSchemaNode from "./DatabaseSchemaNode";
+import { useNavigate, useParams } from "react-router-dom";
 
 const nodeTypes = {
   databaseSchema: CustomDatabaseSchemaNode,
@@ -31,6 +32,10 @@ const initialNodes: Node[] = [
 const initialEdges: Edge[] = [];
 
 export default function MindMap() {
+  const { mapId } = useParams<{ mapId: string }>();
+  const [mapTitle, setMapTitle] = useState("Untitled Mindmap");
+  const [isSaveDialogOpen, setIsSaveDialogOpen] = useState(false);
+
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
 
@@ -42,8 +47,29 @@ export default function MindMap() {
   >([]);
 
   const selectedNode = nodes.find((n) => n.id === selectedNodeId);
+  const navigate = useNavigate();
 
-  // Add default node
+  const handleTitleChange = (newTitle: string) => {
+    setMapTitle(newTitle);
+    const savedMaps = localStorage.getItem("maps");
+    if (!savedMaps) return;
+
+    try {
+      const maps = JSON.parse(savedMaps);
+      const updatedMaps = maps.map((m: any) =>
+        m.id === mapId ? { ...m, title: newTitle } : m
+      );
+      localStorage.setItem("maps", JSON.stringify(updatedMaps));
+    } catch {
+      console.error("Failed to update map title");
+    }
+  };
+
+  const handleSave = () => {
+    localStorage.setItem(`mindmap-${mapId}`, JSON.stringify({ nodes, edges }));
+    setIsSaveDialogOpen(true);
+  };
+
   const handleAddNode = () => {
     const id = `${nodes.length + 1}`;
     const newNode: Node = {
@@ -58,7 +84,23 @@ export default function MindMap() {
     setNodes((nds) => [...nds, newNode]);
   };
 
-  // Delete node
+  const handleAddDatabaseNode = () => {
+    const id = `${nodes.length + 1}`;
+    const newNode: Node = {
+      id,
+      type: "databaseSchema",
+      position: { x: Math.random() * 400, y: Math.random() * 400 },
+      data: {
+        label: "New Table",
+        schema: [
+          { title: "id", type: "uuid" },
+          { title: "name", type: "varchar" },
+        ],
+      },
+    };
+    setNodes((nds) => [...nds, newNode]);
+  };
+
   const handleDeleteNode = () => {
     if (!selectedNodeId) return;
     setNodes((nds) => nds.filter((n) => n.id !== selectedNodeId));
@@ -76,22 +118,10 @@ export default function MindMap() {
   };
 
   //   // Double click to edit
-  //   const handleNodeDoubleClick = (_e: any, node: Node) => {
-  //     setSelectedNodeId(node.id);
-  //     const label =
-  //       node.type === "database"
-  //         ? String(node.data.table ?? "")
-  //         : String(node.data.label ?? "");
-  //     setEditLabel(label);
-  //     setIsEditDialogOpen(true);
-  //   };
   const handleNodeDoubleClick = (_e: any, node: Node) => {
     setSelectedNodeId(node.id);
-    const label = typeof node.data.label === "string" ? node.data.label : "";
-    const schema = Array.isArray(node.data.schema) ? node.data.schema : [];
-
-    setEditLabel(label);
-    setEditSchema(schema); // ⬅️ Set columns to edit
+    setEditLabel(typeof node.data.label === "string" ? node.data.label : "");
+    setEditSchema(Array.isArray(node.data.schema) ? node.data.schema : []);
     setIsEditDialogOpen(true);
   };
 
@@ -105,8 +135,8 @@ export default function MindMap() {
           ? {
               ...n,
               data:
-                n.type === "database"
-                  ? { ...n.data, table: editLabel }
+                n.type === "databaseSchema"
+                  ? { ...n.data, label: editLabel, schema: editSchema }
                   : { ...n.data, label: editLabel },
             }
           : n
@@ -117,28 +147,37 @@ export default function MindMap() {
 
   const handleConnect = useCallback(
     (connection: Connection) => setEdges((eds) => addEdge(connection, eds)),
-    []
+    [setEdges]
   );
 
-  const handleAddDatabaseNode = () => {
-    const id = `${nodes.length + 1}`;
-    const newNode: Node = {
-      id,
-      type: "databaseSchema",
-      position: { x: Math.random() * 40, y: Math.random() * 40 },
-      data: {
-        label: "New Table",
-        schema: [
-          { title: "id", type: "uuid" },
-          { title: "name", type: "varchar" },
-        ],
-      },
-    };
-    setNodes((nds) => [...nds, newNode]);
-  };
+  useEffect(() => {
+    if (!mapId) return;
+
+    try {
+      const savedMindmap = localStorage.getItem(`mindmap-${mapId}`);
+      if (savedMindmap) {
+        const { nodes, edges } = JSON.parse(savedMindmap);
+        if (nodes && edges) {
+          setNodes(nodes);
+          setEdges(edges);
+        }
+      }
+
+      const savedMaps = localStorage.getItem("maps");
+      if (savedMaps) {
+        const maps = JSON.parse(savedMaps);
+        const currentMap = maps.find((m: any) => m.id === mapId);
+        if (currentMap?.title) {
+          setMapTitle(currentMap.title);
+        }
+      }
+    } catch (err) {
+      console.error("Failed to load mindmap or title", err);
+    }
+  }, [mapId, setNodes, setEdges]);
 
   return (
-    <div className="w-full h-screen">
+    <div className="w-full h-screen flex flex-col">
       {/* Toolbar */}
       <div className="flex gap-4 p-4 border-b items-center bg-white z-10">
         <Button onClick={handleAddNode}>Add Node</Button>
@@ -150,25 +189,35 @@ export default function MindMap() {
         >
           Delete
         </Button>
+        <Button onClick={handleSave}>Save Mindmap</Button>
+        <Button onClick={() => navigate(-1)}>Back</Button>
+        <Input
+          value={mapTitle}
+          onChange={(e) => handleTitleChange(e.target.value)}
+          placeholder="Mindmap title"
+          className="w-64"
+        />
       </div>
 
       {/* React Flow Canvas */}
-      <ReactFlow
-        nodes={nodes}
-        edges={edges}
-        onNodesChange={onNodesChange}
-        onEdgesChange={onEdgesChange}
-        onConnect={handleConnect}
-        onNodeClick={handleNodeClick}
-        onNodeDoubleClick={handleNodeDoubleClick}
-        nodeTypes={nodeTypes}
-        fitView
-        className="overflow-hidden"
-      >
-        <Background />
-        <MiniMap />
-        <Controls />
-      </ReactFlow>
+      <div className="flex-grow">
+        <ReactFlow
+          nodes={nodes}
+          edges={edges}
+          onNodesChange={onNodesChange}
+          onEdgesChange={onEdgesChange}
+          onConnect={handleConnect}
+          onNodeClick={handleNodeClick}
+          onNodeDoubleClick={handleNodeDoubleClick}
+          nodeTypes={nodeTypes}
+          fitView
+          className="overflow-hidden"
+        >
+          <Background />
+          <MiniMap />
+          <Controls />
+        </ReactFlow>
+      </div>
 
       {/* Edit Dialog */}
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
@@ -222,12 +271,23 @@ export default function MindMap() {
             value={editLabel}
             onChange={(e) => setEditLabel(e.target.value)}
             placeholder={
-              selectedNode?.type === "database"
-                ? "Enter table name"
-                : "Enter label"
+              selectedNode?.type === "databaseSchema" ? "Table name" : "Label"
             }
+            className="mt-4"
           />
-          <Button onClick={handleUpdateLabel}>Save</Button>
+          <Button onClick={handleUpdateLabel} className="mt-2">
+            Save
+          </Button>
+        </DialogContent>
+      </Dialog>
+
+      {/* Save Confirmation Dialog */}
+      <Dialog open={isSaveDialogOpen} onOpenChange={setIsSaveDialogOpen}>
+        <DialogContent className="text-center">
+          <p className="text-lg font-medium">Mindmap saved successfully!</p>
+          <Button onClick={() => setIsSaveDialogOpen(false)} className="mt-4">
+            Close
+          </Button>
         </DialogContent>
       </Dialog>
     </div>
