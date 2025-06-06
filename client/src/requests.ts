@@ -10,7 +10,7 @@
 // }
 
 
-const baseUrl = "https://mind-map-6kle.onrender.com";
+const baseUrl = "https://mind-map-6kle.onrender.com/api";
 export const requests = {
     createMap: `${baseUrl}/mindmaps`,
     deleteMap: (mapId : String) => `${baseUrl}/mindmaps/${mapId}`,
