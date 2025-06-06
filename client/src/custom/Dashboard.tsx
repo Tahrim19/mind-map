@@ -3,12 +3,11 @@ import { useNavigate } from "react-router-dom";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Trash } from "lucide-react";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogFooter,
-} from "@/components/ui/dialog";
+import { fetchUserMaps } from "./handlers/dashboard/fetchUserMaps";
+import { createMindmap } from "./handlers/dashboard/createMindmap";
+import { deleteMindmap } from "./handlers/dashboard/deleteMindmap";
+import { handleLogout } from "./handlers/dashboard/handleLogout";
+import DeleteMindmapDialog from "./handlers/dashboard/DeleteMindmapDialog";
 
 type MapInfo = {
   id: string;
@@ -22,54 +21,46 @@ export default function Dashboard() {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [mapToDelete, setMapToDelete] = useState<MapInfo | null>(null);
 
+  const token = localStorage.getItem("token");
+
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
-    if (!storedUser) {
-      navigate("/login");
+    if (!storedUser || !token) {
+      navigate("/");
       return;
     }
     setUser(JSON.parse(storedUser));
 
-    const savedMaps = localStorage.getItem("maps");
-    if (savedMaps) {
-      setMaps(JSON.parse(savedMaps));
+    fetchUserMaps(token)
+      .then(setMaps)
+      .catch(() => alert("Failed to load mindmaps"));
+  }, [navigate, token]);
+
+  const onCreate = async () => {
+    try {
+      await createMindmap(token!, maps, setMaps, navigate);
+    } catch (err: any) {
+      alert(err.message);
     }
-  }, [navigate]);
-
-  const handleLogout = () => {
-    localStorage.removeItem("user");
-    navigate("/login");
   };
 
-  const handleCreateNewMindmap = () => {
-    const newId = Date.now().toString();
-    const newMap = { id: newId, title: "Untitled Mindmap" };
-    const newMaps = [...maps, newMap];
-    setMaps(newMaps);
-    localStorage.setItem("maps", JSON.stringify(newMaps));
-    navigate(`/mindmap/${newId}`);
-  };
-
-  const handleLoadMindmap = (id: string) => {
-    navigate(`/mindmap/${id}`);
-  };
-
-  const confirmDeleteMindmap = () => {
+  const onDelete = async () => {
     if (!mapToDelete) return;
-
-    const updatedMaps = maps.filter((map) => map.id !== mapToDelete.id);
-    setMaps(updatedMaps);
-    localStorage.setItem("maps", JSON.stringify(updatedMaps));
-    localStorage.removeItem(`mindmap-${mapToDelete.id}`);
-    setDeleteDialogOpen(false);
-    setMapToDelete(null);
+    try {
+      await deleteMindmap(mapToDelete.id, token!, maps, setMaps, () => {
+        setDeleteDialogOpen(false);
+        setMapToDelete(null);
+      });
+    } catch (err: any) {
+      alert(err.message);
+    }
   };
 
   return (
     <div className="max-w-4xl mx-auto p-6">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">Dashboard</h1>
-        <Button variant="destructive" onClick={handleLogout}>
+        <Button variant="destructive" onClick={() => handleLogout(navigate)}>
           Logout
         </Button>
       </div>
@@ -85,7 +76,7 @@ export default function Dashboard() {
         </CardContent>
       </Card>
 
-      <Button onClick={handleCreateNewMindmap} className="mb-4">
+      <Button onClick={onCreate} className="mb-4">
         Create New Mindmap
       </Button>
 
@@ -94,7 +85,9 @@ export default function Dashboard() {
           <CardTitle>Your Maps</CardTitle>
         </CardHeader>
         <CardContent>
-          {maps.length === 0 && <p></p>}
+          {maps.length === 0 && (
+            <p className="text-gray-500">No mindmaps yet.</p>
+          )}
           {maps.map((map) => (
             <div
               key={map.id}
@@ -102,7 +95,7 @@ export default function Dashboard() {
             >
               <span
                 className="cursor-pointer flex-1"
-                onClick={() => handleLoadMindmap(map.id)}
+                onClick={() => navigate(`/mindmap/${map.id}`)}
               >
                 {map.title}
               </span>
@@ -120,26 +113,13 @@ export default function Dashboard() {
       </Card>
 
       {/* Delete Confirmation Dialog */}
-      <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <h2 className="text-lg font-semibold">Delete Mindmap</h2>
-            <p>
-              Are you sure you want to delete{" "}
-              <strong>{mapToDelete?.title}</strong>? This action cannot be
-              undone.
-            </p>
-          </DialogHeader>
-          <DialogFooter className="flex justify-end gap-2">
-            <Button onClick={() => setDeleteDialogOpen(false)}>
-              Cancel
-            </Button>
-            <Button variant="destructive" onClick={confirmDeleteMindmap}>
-              Delete
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <DeleteMindmapDialog
+        open={deleteDialogOpen}
+        onOpenChange={setDeleteDialogOpen}
+        onDelete={onDelete}
+        onCancel={() => setMapToDelete(null)}
+        mapTitle={mapToDelete?.title}
+      />
     </div>
   );
 }
