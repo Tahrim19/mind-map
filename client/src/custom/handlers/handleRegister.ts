@@ -1,3 +1,5 @@
+import { requests } from "@/requests";
+
 export const handleRegister = async ({
   username,
   password,
@@ -8,7 +10,7 @@ export const handleRegister = async ({
   navigate: (path: string) => void;
 }): Promise<void> => {
   try {
-    const res = await fetch("http://localhost:5000/api/auth/register", {
+    const res = await fetch(requests.register, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       credentials: "include",

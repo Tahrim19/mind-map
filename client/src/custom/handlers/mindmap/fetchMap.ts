@@ -1,3 +1,5 @@
+import  { requests } from "@/requests";
+
 export const fetchMap = async ({
   mapId,
   token,
@@ -12,7 +14,7 @@ export const fetchMap = async ({
   setMapTitle: (title: string) => void;
 }) => {
   try {
-    const res = await fetch(`http://localhost:5000/api/mindmaps/${mapId}`, {
+    const res = await fetch(requests.fetchMap(mapId), {
       headers: {
         Authorization: `Bearer ${token}`,
       },

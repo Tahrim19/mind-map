@@ -1,5 +1,7 @@
+import { requests } from "@/requests";
+
 export const fetchUserMaps = async (token: string) => {
-  const res = await fetch("http://localhost:5000/api/mindmaps", {
+  const res = await fetch(requests.fetchAllMaps, {
     headers: {
       Authorization: `Bearer ${token}`,
     },

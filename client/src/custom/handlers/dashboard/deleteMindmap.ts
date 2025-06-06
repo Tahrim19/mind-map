@@ -1,3 +1,5 @@
+import { requests } from "@/requests";
+
 export const deleteMindmap = async (
   mapId: string,
   token: string,
@@ -5,7 +7,7 @@ export const deleteMindmap = async (
   setMaps: (maps: { id: string; title: string }[]) => void,
   closeDialog: () => void
 ) => {
-  const res = await fetch(`http://localhost:5000/api/mindmaps/${mapId}`, {
+  const res = await fetch(requests.deleteMap(mapId), {
     method: "DELETE",
     headers: {
       Authorization: `Bearer ${token}`,

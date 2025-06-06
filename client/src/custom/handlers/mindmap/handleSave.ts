@@ -1,3 +1,5 @@
+import { requests } from "@/requests";
+
 export const handleSave = async ({
   mapId,
   token,
@@ -14,7 +16,7 @@ export const handleSave = async ({
   setIsSaveDialogOpen: (val: boolean) => void;
 }) => {
   try {
-    const res = await fetch(`http://localhost:5000/api/mindmaps/${mapId}`, {
+    const res = await fetch(requests.saveMap(mapId), {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",

@@ -1,3 +1,5 @@
+import { requests } from "@/requests";
+
 export const handleTitleChange = async ({
   newTitle,
   mapId,
@@ -18,7 +20,7 @@ export const handleTitleChange = async ({
   if (!mapId) return;
 
   try {
-    await fetch(`http://localhost:5000/api/mindmaps/${mapId}`, {
+    await fetch(requests.titleChange(mapId), {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",

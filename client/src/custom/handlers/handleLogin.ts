@@ -1,3 +1,5 @@
+import { requests } from "@/requests";
+
 export const handleLogin = async ({
   username,
   password,
@@ -7,7 +9,7 @@ export const handleLogin = async ({
   password: string;
   navigate: (path: string) => void;
 }): Promise<void> => {
-  const res = await fetch("http://localhost:5000/api/auth/", {
+  const res = await fetch(requests.login, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     credentials: "include",
