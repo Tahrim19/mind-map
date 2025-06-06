@@ -10,7 +10,7 @@
 // }
 
 
-const baseUrl = "https://mind-map-ivory.vercel.app/api";
+const baseUrl = "https://mind-map-ivory.vercel.app";
 export const requests = {
     createMap: `${baseUrl}/mindmaps`,
     deleteMap: (mapId : String) => `${baseUrl}/mindmaps/${mapId}`,
