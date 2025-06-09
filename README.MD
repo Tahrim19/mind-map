@@ -1,20 +1,20 @@
 # 🧠 MindMap — Visual Thinking Tool
 
 A modern, minimal, and interactive mind mapping app to help you visually plan, organize, and connect ideas. Built using **React Flow**, **shadcn/ui**, and **Node.js** with full authentication, map management, and node editing features.
-
+🌐 **Live Demo**: [Click Here](https://mind-map-ivory.vercel.app)
 ---
 
 ## 🚀 Features
 
-- 🔐 User Login & Registration
-- 📄 Dashboard to load, save, and manage maps
+- 🔐 User Login & Registration.
+- 📄 Dashboard to load, save, and manage maps.
 - 🧠 Add, update, and delete:
-  - Normal Nodes
-  - Database Schema Nodes (with custom fields)
-- 🔗 Connect nodes with edges
-- ✏️ Edit node labels and schemas via dialog
-- 📝 Update the mindmap title in real-time
-- 💾 All data stored securely in **MongoDB Atlas**
+  - Normal Nodes.
+  - Database Schema Nodes (with custom fields).
+- 🔗 Connect nodes with edges.
+- ✏️ Edit node labels and schemas.
+- 📝 Update the mindmap title.
+- 💾 All data stored.
 
 ---
 
@@ -25,7 +25,6 @@ A modern, minimal, and interactive mind mapping app to help you visually plan, o
 - 🧩 [React Flow](https://reactflow.dev/)  
 - 💨 TailwindCSS  
 - 🎨 [shadcn/ui](https://ui.shadcn.com)  
-- ⚡ Vite  
 
 **Backend**  
 - 🌐 Node.js + Express  
@@ -33,8 +32,8 @@ A modern, minimal, and interactive mind mapping app to help you visually plan, o
 - 🔐 JWT Authentication  
 
 **Deployment**  
-- 🟢 Frontend: [Vercel](https://vercel.com/)  
-- 🔵 Backend: [Render](https://render.com/)  
+- 🟢 Frontend: Vercel 
+- 🔵 Backend: Render
 - 🍃 Database: MongoDB Atlas  
 
 ---
@@ -49,15 +48,6 @@ A modern, minimal, and interactive mind mapping app to help you visually plan, o
 6. 📝 Edit the map title directly in the toolbar
 7. 💾 Click **Save** to persist your mindmap
 8. 🔙 Use **Back** to return to the dashboard anytime
-## 📸 Screenshots
-
----
-
-| MindMap Editor | Dashboard |
-|----------------|-----------|
-| ![Editor](https://your-editor-screenshot.png) | ![Dashboard](https://your-dashboard-screenshot.png) |
-
-> Replace image links above with your own screenshots.
 
 ---
 
@@ -66,7 +56,7 @@ A modern, minimal, and interactive mind mapping app to help you visually plan, o
 ### 1. Clone the Repo
 
 ```bash
-git clone https://github.com/yourusername/mindmap.git
+git clone https://github.com/Tahrim19/mind-map.git
 cd mindmap
 ````
 
@@ -83,7 +73,7 @@ npm run dev
 ```bash
 cd ../backend
 npm install
-npm run dev
+node server.js
 ```
 
 ### 🛠 Backend `.env` example:
@@ -96,6 +86,14 @@ JWT_SECRET=your_super_secret_key
 
 ---
 
+## 👨‍💻 Author
+
+**Tahrim Bilal**  
+GitHub: [Tahrim19](https://github.com/Tahrim19) 
+LinkedIn: [Tahrim Bilal](https://www.linkedin.com/in/tahrim-bilal)
+Feel free to reach out or contribute!
+
+---
 <!-- 
 ## 📌 TODO (Coming Soon)
 
