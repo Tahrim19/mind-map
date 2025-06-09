@@ -1,6 +1,11 @@
 # 🧠 MindMap — Visual Thinking Tool
+
 A modern, minimal, and interactive mind mapping app to help you visually plan, organize, and connect ideas. Built using **React Flow**, **shadcn/ui**, and **Node.js** with full authentication, map management, and node editing features. <br>
+
+---
+
 🌐 **Live Demo**: [Click Here](https://mind-map-ivory.vercel.app)
+
 ---
 
 ## 🚀 Features
