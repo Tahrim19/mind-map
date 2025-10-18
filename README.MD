@@ -93,7 +93,7 @@ JWT_SECRET=your_super_secret_key
 
 **Tahrim Bilal**  
 GitHub: [Tahrim19](https://github.com/Tahrim19) <br>
-LinkedIn: [Tahrim Bilal](https://www.linkedin.com/in/tahrim-bilal)
+LinkedIn: [Tahrim Bilal](https://www.linkedin.com/in/tahrim-bilal) <br>
 Feel free to reach out or contribute!
 
 ---
