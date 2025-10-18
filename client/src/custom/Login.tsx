@@ -9,21 +9,34 @@ import {
 } from "../components/ui/card";
 import { Input } from "../components/ui/input";
 import { Button } from "../components/ui/button";
+import { Spinner } from "../components/ui/spinner"; 
 import { handleLogin } from "./handlers/handleLogin";
 
 export default function Login() {
   const navigate = useNavigate();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false); 
 
   const onSubmit = async (e: React.FormEvent) => {
-  e.preventDefault();
-  try {
-    await handleLogin({ username, password, navigate });
-  } catch (err: any) {
-    console.error("Unhandled error:", err);
+    e.preventDefault();
+    setLoading(true); 
+    try {
+      await handleLogin({ username, password, navigate });
+    } catch (err: any) {
+      console.error("Unhandled error:", err);
+      setLoading(false); // hide spinner if failed
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="flex flex-col items-center justify-center h-screen bg-gray-50">
+        <Spinner className="w-8 h-8 mb-4" />
+        <p className="text-gray-600 text-sm">Logging in, please wait...</p>
+      </div>
+    );
   }
-};
 
   return (
     <div className="flex items-center justify-center h-screen bg-gray-50">
